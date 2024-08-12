@@ -1,0 +1,102 @@
+<div class="calendar-container">
+  <div class="calendar-header">
+    <button mat-icon-button (click)="navigatePeriod(-1)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <h2>{{ currentMonthYear }}</h2>
+    <button mat-icon-button (click)="navigatePeriod(1)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <div class="view-toggle">
+    <button mat-button (click)="switchView('month')" [class.active]="currentView === 'month'">Month</button>
+    <button mat-button (click)="switchView('week')" [class.active]="currentView === 'week'">Week</button>
+  </div>
+
+  <div class="calendar-content" [ngSwitch]="currentView">
+    <div *ngSwitchCase="'month'" class="month-view">
+      <div class="calendar-grid">
+        <div class="weekday" *ngFor="let day of weekDays">{{ day }}</div>
+        <div
+          *ngFor="let day of calendarDays"
+          class="calendar-day"
+          [class.other-month]="day.getMonth() !== currentDate.getMonth()"
+          [class.selected]="day.toDateString() === selectedDate.toDateString()"
+          (click)="onDateSelect(day)"
+        >
+          {{ day.getDate() }}
+          <div class="day-appointments">
+            <div *ngFor="let apt of (getDayAppointments(day) | async)" class="day-appointment-indicator"></div>
+          </div>
+        </div>
+      </div>
+      <div class="selected-day-appointments">
+        <h3>{{ selectedDate | date:'EEEE, MMMM d, y' }}</h3>
+        <button mat-raised-button color="primary" (click)="openAppointmentForm()">Add Appointment</button>
+        <div class="appointment-list">
+          <ng-container *ngFor="let appointment of (selectedDayAppointments$ | async)">
+            <div class="appointment-item">
+              <div class="appointment-time">{{ appointment.date | date:'h:mm a' }}</div>
+              <div class="appointment-title">{{ appointment.title }}</div>
+              <div class="appointment-actions">
+                <button mat-icon-button (click)="openAppointmentForm(appointment)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteAppointment(appointment)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+    <div *ngSwitchCase="'week'" class="week-view">
+      <div class="week-container">
+        <div class="week-header">
+          <div class="time-column"></div>
+          <div class="day-column" *ngFor="let date of weekDates">
+            {{ date | date:'EEE' }}<br>{{ date | date:'d' }}
+          </div>
+        </div>
+        <div class="week-body" #weekBody (scroll)="updateWeekBodyRect()">
+          <div class="time-column">
+            <div class="time-slot" *ngFor="let time of timeSlots">
+              {{ time }}
+            </div>
+          </div>
+          <div class="days-container">
+            <div class="day-column" *ngFor="let date of weekDates">
+              <div class="time-slot" *ngFor="let time of timeSlots"
+                   [id]="getTimeSlotId(date, time)"
+                   cdkDropList
+                   [cdkDropListData]="{date: date, time: time}"
+                   (cdkDropListDropped)="drop($event)"
+                   (click)="openAppointmentForm(undefined, date, time)"
+              >
+              </div>
+              <ng-container *ngFor="let appointment of (getDayAppointments(date) | async)">
+                <div class="appointment-item"
+                     [style.height.px]="getAppointmentHeight(appointment)"
+                     [style.top.px]="getAppointmentPosition(appointment)"
+                     cdkDrag
+                     [cdkDragData]="appointment"
+                     [cdkDragBoundary]="'.week-body'"
+                     (cdkDragStarted)="onDragStarted($event)"
+                     (cdkDragEnded)="onDragEnded($event)">
+                  <div class="appointment-content" (click)="openAppointmentForm(appointment)">
+                    {{ appointment.title }}
+                  </div>
+                  <div class="resize-handle" cdkDrag (cdkDragEnded)="onResizeEnded($event, appointment)">
+                    <mat-icon>drag_handle</mat-icon>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

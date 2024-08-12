@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>{{ isNewAppointment ? 'Add Appointment' : 'Edit Appointment' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="appointmentForm">
+    <mat-form-field appearance="fill">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="date" required>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Time</mat-label>
+      <input matInput type="time" formControlName="time" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Duration (minutes)</mat-label>
+      <input matInput type="number" formControlName="duration" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button color="warn" *ngIf="!isNewAppointment" (click)="onDelete()">Delete</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!appointmentForm.valid">
+    {{ isNewAppointment ? 'Add' : 'Update' }}
+  </button>
+</mat-dialog-actions>
