@@ -1,6 +1,8 @@
 {
   "name": "calendar-app",
   "version": "0.0.0",
+  "homepage": "/calendar-app",
+  "author": "Naveen Prashanth",
   "scripts": {
     "ng": "ng generate",
     "start": "ng serve",
